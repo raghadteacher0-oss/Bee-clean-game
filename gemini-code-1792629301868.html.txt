@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مغامرة نحلة النظافة – نظافة الملابس والمكان</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons for UI -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-yellow: #FFD54F;
+            --honey-gold: #FFB300;
+            --honey-dark: #FF8F00;
+            --sky-blue: #E1F5FE;
+            --sky-blue-deep: #4FC3F7;
+            --leaf-green: #81C784;
+            --leaf-dark: #388E3C;
+            --soft-white: #FFFFFF;
+            --text-color: #3E2723;
+            --card-shadow: 0 12px 28px rgba(0,0,0,0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(180deg, #B3E5FC 0%, #E8F5E9 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            color: var(--text-color);
+            direction: rtl;
+        }
+
+        /* Container */
+        .game-app {
+            width: 100%;
+            max-width: 960px;
+            min-height: 640px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            border: 8px solid #FFF;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            margin: 15px;
+        }
+
+        /* Background Garden Elements */
+        .bg-garden {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .cloud {
+            position: absolute;
+            background: #FFF;
+            border-radius: 50px;
+            opacity: 0.8;
+            animation: floatCloud 25s linear infinite;
+        }
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: #FFF;
+            border-radius: 50%;
+        }
+        .cloud-1 { width: 120px; height: 40px; top: 40px; right: -150px; }
+        .cloud-1::before { width: 50px; height: 50px; top: -20px; right: 20px; }
+        .cloud-1::after { width: 40px; height: 40px; top: -15px; right: 55px; }
+
+        .cloud-2 { width: 160px; height: 50px; top: 100px; right: -200px; animation-delay: 12s; }
+        .cloud-2::before { width: 70px; height: 70px; top: -30px; right: 25px; }
+        .cloud-2::after { width: 50px; height: 50px; top: -20px; right: 80px; }
+
+        @keyframes floatCloud {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-1200px); }
+        }
+
+        .hex-bg {
+            position: absolute;
+            opacity: 0.15;
+            fill: var(--honey-gold);
+        }
+
+        /* Header Bar */
+        .top-bar {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.7);
+            border-bottom: 3px solid rgba(255, 179, 0, 0.3);
+        }
+
+        .stage-badge {
+            background: linear-gradient(135deg, var(--honey-gold), var(--honey-dark));
+            color: #FFF;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(255, 143, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stats-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .stat-item {
+            background: #FFF;
+            padding: 6px 14px;
+            border-radius: 16px;
+            border: 2px solid var(--primary-yellow);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 800;
+            color: var(--honey-dark);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .audio-btn {
+            background: #FFF;
+            border: 2px solid #B3E5FC;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--sky-blue-deep);
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+        }
+        .audio-btn:hover { transform: scale(1.08); background: var(--sky-blue); }
+
+        /* Main Display Screen Container */
+        .screen {
+            position: relative;
+            z-index: 5;
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+            text-align: center;
+        }
+        .screen.active {
+            display: flex;
+        }
+
+        /* Start Screen */
+        .welcome-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px 40px;
+            border-radius: 28px;
+            border: 4px solid var(--primary-yellow);
+            box-shadow: var(--card-shadow);
+            max-width: 650px;
+            width: 100%;
+            animation: zoomIn 0.5s ease-out;
+        }
+
+        .game-title {
+            font-size: 2.2rem;
+            color: var(--honey-dark);
+            margin-bottom: 15px;
+            font-weight: 900;
+            text-shadow: 1px 1px 0px #FFF;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7CB342, #558B2F);
+            color: white;
+            font-size: 1.6rem;
+            font-weight: 800;
+            padding: 14px 45px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(85, 139, 47, 0.4);
+            transition: all 0.25s ease;
+            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 12px 25px rgba(85, 139, 47, 0.5);
+        }
+        .btn-primary:active {
+            transform: translateY(2px);
+        }
+
+        /* Cute Bee SVG Character CSS & Animations */
+        .bee-wrapper {
+            position: relative;
+            width: 170px;
+            height: 170px;
+            margin: 0 auto 15px auto;
+            cursor: pointer;
+        }
+
+        .bee-svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .bee-wing-left {
+            transform-origin: 80px 70px;
+            animation: wingFlapL 0.15s infinite alternate ease-in-out;
+        }
+        .bee-wing-right {
+            transform-origin: 110px 70px;
+            animation: wingFlapR 0.15s infinite alternate ease-in-out;
+        }
+
+        @keyframes wingFlapL {
+            0% { transform: rotate(0deg) scaleX(1); }
+            100% { transform: rotate(-25deg) scaleX(0.8); }
+        }
+        @keyframes wingFlapR {
+            0% { transform: rotate(0deg) scaleX(1); }
+            100% { transform: rotate(25deg) scaleX(0.8); }
+        }
+
+        .bee-float {
+            animation: beeFloat 3s infinite ease-in-out;
+        }
+        @keyframes beeFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-14px) rotate(2deg); }
+        }
+
+        .bee-happy {
+            animation: beeHappy 0.6s ease-in-out infinite alternate;
+        }
+        @keyframes beeHappy {
+            0% { transform: translateY(0) scale(1) rotate(-5deg); }
+            100% { transform: translateY(-25deg) scale(1.1) rotate(5deg); }
+        }
+
+        /* Speech Bubble */
+        .speech-bubble {
+            position: relative;
+            background: #FFF;
+            border-radius: 20px;
+            padding: 16px 24px;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-color);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            border: 3px solid var(--primary-yellow);
+            margin-bottom: 20px;
+            max-width: 700px;
+            line-height: 1.6;
+        }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 15px 15px 0;
+            border-style: solid;
+            border-color: #FFF transparent;
+            display: block;
+            width: 0;
+        }
+        .speech-bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -19px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 17px 17px 0;
+            border-style: solid;
+            border-color: var(--primary-yellow) transparent;
+            display: block;
+            width: 0;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            max-width: 650px;
+            background: rgba(255,255,255,0.8);
+            height: 18px;
+            border-radius: 10px;
+            margin: 10px 0 20px 0;
+            overflow: hidden;
+            border: 2px solid #FFF;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary-yellow), var(--honey-dark));
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+        /* Options Grid */
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 680px;
+        }
+
+        .option-btn {
+            background: #FFF;
+            border: 3px solid #E0E0E0;
+            border-radius: 20px;
+            padding: 16px 22px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-color);
+            cursor: pointer;
+            text-align: right;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+        }
+        .option-btn:hover {
+            border-color: var(--sky-blue-deep);
+            background: #F4FBFB;
+            transform: translateX(-4px);
+        }
+        .option-btn.correct {
+            background: #E8F5E9 !important;
+            border-color: var(--leaf-green) !important;
+            color: var(--leaf-dark) !important;
+        }
+        .option-btn.wrong {
+            background: #FFEBEE !important;
+            border-color: #EF5350 !important;
+            color: #C62828 !important;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        .opt-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #F0F0F0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #666;
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+
+        /* Hint Box */
+        .hint-box {
+            margin-top: 15px;
+            background: #FFFDE7;
+            border: 2px dashed #FBC02D;
+            padding: 12px 20px;
+            border-radius: 16px;
+            color: #F57F17;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Surprise Interactive Scene */
+        .surprise-scene {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 260px;
+            background: #FFF8E1;
+            border: 4px dashed var(--honey-gold);
+            border-radius: 24px;
+            margin: 15px 0;
+            overflow: hidden;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .dirty-item {
+            cursor: pointer;
+            font-size: 3.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+        .dirty-item:hover {
+            transform: scale(1.2) rotate(10deg);
+        }
+        .dirty-item.cleaned {
+            opacity: 0.2;
+            transform: scale(0.5);
+            pointer-events: none;
+        }
+
+        /* Certificate / End Screen */
+        .cert-card {
+            background: #FFF;
+            border: 10px solid var(--primary-yellow);
+            border-radius: 30px;
+            padding: 35px 30px;
+            max-width: 680px;
+            width: 100%;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            background-image: radial-gradient(#FFF8E1 20%, transparent 20%);
+            background-size: 20px 20px;
+        }
+
+        .cert-title {
+            color: var(--honey-dark);
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .student-input {
+            border: 3px solid var(--sky-blue-deep);
+            border-radius: 15px;
+            padding: 10px 20px;
+            font-size: 1.4rem;
+            text-align: center;
+            font-weight: 700;
+            outline: none;
+            width: 80%;
+            max-width: 320px;
+            margin: 15px 0;
+            color: var(--text-color);
+        }
+        .student-input:focus {
+            box-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+
+        .btn-replay {
+            background: linear-gradient(135deg, #0288D1, #01579B);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(2, 136, 209, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-print {
+            background: linear-gradient(135deg, #8E24AA, #6A1B9A);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 15px;
+            margin-right: 10px;
+            box-shadow: 0 5px 15px rgba(142, 36, 170, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Print styles for Certificate */
+        @media print {
+            body * { visibility: hidden; }
+            .cert-card, .cert-card * { visibility: visible; }
+            .cert-card {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: 6px solid var(--honey-gold);
+            }
+            .student-input { border: none; background: transparent; }
+            .btn-replay, .btn-print, .audio-btn { display: none !important; }
+        }
+
+        /* Responsive UI */
+        @media (max-width: 600px) {
+            .game-app { margin: 5px; border-width: 4px; }
+            .game-title { font-size: 1.6rem; }
+            .speech-bubble { font-size: 1.1rem; padding: 12px 16px; }
+            .option-btn { font-size: 1.05rem; padding: 12px 15px; }
+            .bee-wrapper { width: 130px; height: 130px; }
+            .stage-badge { font-size: 0.9rem; padding: 6px 12px; }
+            .stat-item { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-app">
+        <!-- SVG Background Decorations -->
+        <div class="bg-garden">
+            <div class="cloud cloud-1"></div>
+            <div class="cloud cloud-2"></div>
+            
+            <!-- Hexagons representing beehive -->
+            <svg class="hex-bg" style="top: 10px; left: 20px; width: 120px;" viewBox="0 0 100 100">
+                <polygon points="50 3, 100 25, 100 75, 50 97, 0 75, 0 25" />
+            </svg>
+            <svg class="hex-bg" style="bottom: 20px; right: 30px; width: 150px;" viewBox="0 0 100 100">
+                <polygon points="50 3, 100 25, 100 75, 50 97, 0 75, 0 25" />
+            </svg>
+        </div>
+
+        <!-- Top Navigation Bar -->
+        <div class="top-bar">
+            <div class="stage-badge" id="stageBadge">
+                <i class="fa-solid fa-shirt"></i>
+                <span id="stageName">المرحلة 1: خلية الملابس</span>
+            </div>
+
+            <div class="stats-group">
+                <div class="stat-item" title="قطرات العسل">
+                    <i class="fa-solid fa-droplet" style="color: var(--honey-gold);"></i>
+                    <span id="honeyScore">0</span>
+                </div>
+                <div class="stat-item" title="النجوم">
+                    <i class="fa-solid fa-star" style="color: #FFD54F;"></i>
+                    <span id="starScore">0</span>
+                </div>
+                <button class="audio-btn" id="soundToggleBtn" onclick="toggleMute()" title="كتم/تشغيل الصوت">
+                    <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 1: Welcome / Start Screen -->
+        <div class="screen active" id="startScreen">
+            <div class="welcome-card">
+                <div class="bee-wrapper bee-float" onclick="repeatSpeech()">
+                    <svg class="bee-svg" viewBox="0 0 200 200">
+                        <g class="bee-wing-left">
+                            <ellipse cx="65" cy="55" rx="30" ry="18" fill="#E0F7FA" stroke="#81D4FA" stroke-width="3" opacity="0.85" transform="rotate(-30 65 55)"/>
+                        </g>
+                        <g class="bee-wing-right">
+                            <ellipse cx="125" cy="55" rx="30" ry="18" fill="#E0F7FA" stroke="#81D4FA" stroke-width="3" opacity="0.85" transform="rotate(30 125 55)"/>
+                        </g>
+                        <ellipse cx="95" cy="115" rx="55" ry="48" fill="#FFC107"/>
+                        <path d="M 50 100 Q 95 108 140 100" stroke="#3E2723" stroke-width="10" fill="none" stroke-linecap="round"/>
+                        <path d="M 45 122 Q 95 132 145 122" stroke="#3E2723" stroke-width="10" fill="none" stroke-linecap="round"/>
+                        <path d="M 58 144 Q 95 152 132 144" stroke="#3E2723" stroke-width="9" fill="none" stroke-linecap="round"/>
+                        <polygon points="95,163 88,180 102,180" fill="#3E2723" />
+                        <circle cx="95" cy="75" r="42" fill="#FFD54F"/>
+                        <circle cx="78" cy="70" r="8" fill="#3E2723"/>
+                        <circle cx="112" cy="70" r="8" fill="#3E2723"/>
+                        <circle cx="80" cy="67" r="3" fill="#FFF"/>
+                        <circle cx="114" cy="67" r="3" fill="#FFF"/>
+                        <circle cx="68" cy="82" r="6" fill="#FF8A80" opacity="0.6"/>
+                        <circle cx="122" cy="82" r="6" fill="#FF8A80" opacity="0.6"/>
+                        <path d="M 83 85 Q 95 98 107 85" stroke="#3E2723" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <path d="M 80 35 Q 70 15 60 20" stroke="#3E2723" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <circle cx="58" cy="20" r="5" fill="#3E2723"/>
+                        <path d="M 110 35 Q 120 15 130 20" stroke="#3E2723" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <circle cx="132" cy="20" r="5" fill="#3E2723"/>
+                    </svg>
+                </div>
+
+                <h1 class="game-title">🐝 مغامرة نحلة النظافة</h1>
+                <p style="font-size: 1.2rem; color: #5D4037; margin-bottom: 15px; font-weight: 700;">نظافة الملابس والمكان - مادة المهارات الحياتية والأسرية</p>
+
+                <div class="speech-bubble">
+                    «مرحبًا يا أبطال النظافة! أنا <b>نحولة</b>، واليوم عندنا مغامرة ممتعة! سنحل الألغاز، ونجمع قطرات العسل، ونتعلم كيف نحافظ على نظافة ملابسنا وأماكننا. هل أنتم مستعدون؟»
+                </div>
+
+                <button class="btn-primary" onclick="startGame()">
+                    <span>ابدأ المغامرة</span>
+                    <i class="fa-solid fa-play"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: Question Scene -->
+        <div class="screen" id="quizScreen">
+            <div class="bee-wrapper bee-float" id="quizBee" onclick="repeatSpeech()">
+                <svg class="bee-svg" viewBox="0 0 200 200">
+                    <g class="bee-wing-left"><ellipse cx="65" cy="55" rx="30" ry="18" fill="#E0F7FA" stroke="#81D4FA" stroke-width="3" opacity="0.85" transform="rotate(-30 65 55)"/></g>
+                    <g class="bee-wing-right"><ellipse cx="125" cy="55" rx="30" ry="18" fill="#E0F7FA" stroke="#81D4FA" stroke-width="3" opacity="0.85" transform="rotate(30 125 55)"/></g>
+                    <ellipse cx="95" cy="115" rx="55" ry="48" fill="#FFC107"/>
+                    <path d="M 50 100 Q 95 108 140 100" stroke="#3E2723" stroke-width="10" fill="none" stroke-linecap="round"/>
+                    <path d="M 45 122 Q 95 132 145 122" stroke="#3E2723" stroke-width="10" fill="none" stroke-linecap="round"/>
+                    <path d="M 58 144 Q 95 152 132 144" stroke="#3E2723" stroke-width="9" fill="none" stroke-linecap="round"/>
+                    <polygon points="95,163 88,180 102,180" fill="#3E2723" />
+                    <circle cx="95" cy="75" r="42" fill="#FFD54F"/>
+                    <circle cx="78" cy="70" r="8" fill="#3E2723"/>
+                    <circle cx="112" cy="70" r="8" fill="#3E2723"/>
+                    <circle cx="80" cy="67" r="3" fill="#FFF"/>
+                    <circle cx="114" cy="67" r="3" fill="#FFF"/>
+                    <circle cx="68" cy="82" r="6" fill="#FF8A80" opacity="0.6"/>
+                    <circle cx="122" cy="82" r="6" fill="#FF8A80" opacity="0.6"/>
+                    <path d="M 83 85 Q 95 98 107 85" stroke="#3E2723" stroke-width="4" fill="none" stroke-linecap="round"/>
+                    <path d="M 80 35 Q 70 15 60 20" stroke="#3E2723" stroke-width="4" fill="none" stroke-linecap="round"/>
+                    <circle cx="58" cy="20" r="5" fill="#3E2723"/>
+                    <path d="M 110 35 Q 120 15 130 20" stroke="#3E2723" stroke-width="4" fill="none" stroke-linecap="round"/>
+                    <circle cx="132" cy="20" r="5" fill="#3E2723"/>
+                </svg>
+            </div>
+
+            <div class="speech-bubble" id="questionText">
+                جاري تحميل السؤال...
+            </div>
+
+            <button class="audio-btn" onclick="repeatSpeech()" style="margin-bottom: 12px;" title="إعادة الاستماع للصوت">
+                <i class="fa-solid fa-volume-high"></i>
+            </button>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div style="font-size: 0.95rem; font-weight: 800; color: #795548; margin-bottom: 12px;" id="qCounterText">
+                السؤال 1 من 8
+            </div>
+
+            <div class="options-grid" id="optionsContainer">
+                <!-- Options populated dynamically -->
+            </div>
+
+            <div class="hint-box" id="hintBox">
+                <i class="fa-solid fa-lightbulb"></i>
+                <span id="hintText">تلميح بسيط...</span>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: Interactive Visual Surprise Stage -->
+        <div class="screen" id="surpriseScreen">
+            <h2 style="color: var(--honey-dark); font-size: 1.8rem; font-weight: 900; margin-bottom: 10px;">
+                ⚡ تحدي مفاجئ: بطل النظافة السريع!
+            </h2>
+            <p style="font-size: 1.2rem; font-weight: 700; color: #5D4037; margin-bottom: 10px;">
+                المكان مكركب ومُتسخ! انقر على الأشياء المتسخة لتنظيفها وجمع العسل:
+            </p>
+
+            <div class="surprise-scene" id="dirtyScene">
+                <div class="dirty-item" onclick="cleanItem(this)" title="منديل متسخ">🧻</div>
+                <div class="dirty-item" onclick="cleanItem(this)" title="قشرة موز">🍌</div>
+                <div class="dirty-item" onclick="cleanItem(this)" title="ورقة ملتقاة">📄</div>
+                <div class="dirty-item" onclick="cleanItem(this)" title="بقعة طعام">🧃</div>
+                <div class="dirty-item" onclick="cleanItem(this)" title="علبة فارغة">🥫</div>
+            </div>
+
+            <div class="speech-bubble" id="surpriseBubble" style="margin-top: 10px;">
+                اضغط على جميع النفايات لتنظيف المكان بسرعة!
+            </div>
+        </div>
+
+        <!-- SCREEN 4: Completion & Certificate Screen -->
+        <div class="screen" id="endScreen">
+            <div class="cert-card">
+                <div style="font-size: 3.5rem; margin-bottom: 5px;">🏆</div>
+                <h1 class="cert-title">شهادة بطل النظافة</h1>
+                <p style="font-size: 1.25rem; font-weight: 700; color: #5D4037;">
+                    تشهد نحولة بأن البطل / البطلة:
+                </p>
+
+                <input type="text" class="student-input" id="studentName" placeholder="اكتب اسم الطالب/الطالبة هنا" value="أحد أبطال النظافة">
+
+                <p style="font-size: 1.15rem; color: #4E342E; margin: 10px 0; line-height: 1.6; font-weight: 700;">
+                    قد أكمل بنجاح <b>«مغامرة نحلة النظافة – نظافة الملابس والمكان»</b><br>
+                    وأثبت تميزه في الحفاظ على النظافة والحيوية!
+                </p>
+
+                <div style="display: flex; justify-content: center; gap: 20px; margin: 20px 0;">
+                    <div class="stat-item" style="font-size: 1.2rem; padding: 10px 20px;">
+                        <i class="fa-solid fa-droplet" style="color: var(--honey-gold);"></i>
+                        <span id="finalHoney">0</span> قطرات عسل
+                    </div>
+                    <div class="stat-item" style="font-size: 1.2rem; padding: 10px 20px;">
+                        <i class="fa-solid fa-star" style="color: #FFD54F;"></i>
+                        <span id="finalStars">0</span> نجوم
+                    </div>
+                </div>
+
+                <div style="font-style: italic; color: #795548; font-weight: 700; margin-bottom: 15px;">
+                    «ملابسي نظيفة، ومكاني نظيف، وأنا مسؤول عن نظافتي!»
+                </div>
+
+                <div>
+                    <button class="btn-replay" onclick="resetGame()">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>العب مرة أخرى</span>
+                    </button>
+                    <button class="btn-print" onclick="window.print()">
+                        <i class="fa-solid fa-print"></i>
+                        <span>طباعة الشهادة</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /* --- Game Data & Questions Setup --- */
+        const questions = [
+            {
+                stage: 1,
+                stageTitle: "المرحلة 1: خلية الملابس النظيفة",
+                stageIcon: "fa-shirt",
+                question: "يا أبطال، اتسخت ملابسي بعد اللعب، ماذا أفعل؟",
+                options: [
+                    "أرتديها كل يوم دون تغيير.",
+                    "أضعها في المكان المخصص للملابس المتسخة وأرتدي ملابس نظيفة.",
+                    "أتركها على الأرض."
+                ],
+                correct: 1,
+                hint: "أحتاج إلى ملابس نظيفة ومرتبة لنحافظ على صحتنا ورائحتنا الطيبة."
+            },
+            {
+                stage: 1,
+                stageTitle: "المرحلة 1: خلية الملابس النظيفة",
+                stageIcon: "fa-shirt",
+                question: "أين أضع المنديل المستعمل؟",
+                options: [
+                    "على الطاولة.",
+                    "في سلة المهملات.",
+                    "على أرض الفصل."
+                ],
+                correct: 1,
+                hint: "ابحث عن المكان المخصص للنفايات ليظل مكاننا جميلًا."
+            },
+            {
+                stage: 1,
+                stageTitle: "المرحلة 1: خلية الملابس النظيفة",
+                stageIcon: "fa-shirt",
+                question: "لماذا لا أستخدم مناشف الآخرين؟",
+                options: [
+                    "حتى لا تنتقل الأمراض والجراثيم.",
+                    "لأن المناشف ليس لها ألوان.",
+                    "حتى لا أحتاج إلى غسل يدي."
+                ],
+                correct: 0,
+                hint: "فكر في كيفية انتقال الجراثيم بين الأشخاص."
+            },
+            {
+                stage: 2,
+                stageTitle: "المرحلة 2: خلية المكان الجميل",
+                stageIcon: "fa-house-chimney",
+                question: "أين أكتب واجبي؟",
+                options: [
+                    "على جدار الفصل.",
+                    "على باب المنزل.",
+                    "في الدفتر أو الورق المخصص للكتابة."
+                ],
+                correct: 2,
+                hint: "أين نكتب واجباتنا المدرسية لنحافظ على جمال الجدران؟"
+            },
+            {
+                stage: 2,
+                stageTitle: "المرحلة 2: خلية المكان الجميل",
+                stageIcon: "fa-house-chimney",
+                question: "كيف نحافظ على نظافة دورة المياه؟",
+                options: [
+                    "نتركها متسخة.",
+                    "نستخدم أدوات التنظيف المخصصة، ونتركها نظيفة بعد الاستخدام.",
+                    "نرمي الأوراق على الأرض."
+                ],
+                correct: 1,
+                hint: "نترك المكان نظيفًا ومريحًا لمن يأتي بعدنا."
+            },
+            {
+                stage: 2,
+                stageTitle: "المرحلة 2: خلية المكان الجميل",
+                stageIcon: "fa-house-chimney",
+                question: "أين أكتب على السبورة؟",
+                options: [
+                    "على السبورة المخصصة للكتابة.",
+                    "على الطاولة.",
+                    "على الجدار."
+                ],
+                correct: 0,
+                hint: "السبورة هي المكان الصحيح لتوضيح دروسنا."
+            },
+            {
+                stage: 3,
+                stageTitle: "المرحلة 3: خلية أبطال النظافة",
+                stageIcon: "fa-award",
+                question: "رأيت ورقة على أرض الفصل، ماذا أفعل؟",
+                options: [
+                    "أتركها دائمًا.",
+                    "أركلها بعيدًا.",
+                    "أضعها في سلة المهملات إذا كان ذلك آمنًا."
+                ],
+                correct: 2,
+                hint: "مساعدة معلمتي وفصلي تجعلني بطلًا حقيقيًا!"
+            },
+            {
+                stage: 3,
+                stageTitle: "المرحلة 3: خلية أبطال النظافة",
+                stageIcon: "fa-award",
+                question: "كيف نحافظ على نظافة مدرستنا؟",
+                options: [
+                    "أترك التنظيف للآخرين دائمًا.",
+                    "أتعاون مع زملائي وأحافظ على نظافة المكان.",
+                    "أرمي النفايات في الحديقة."
+                ],
+                correct: 1,
+                hint: "يدًا بيد نجعل مدرستنا أجمل مكان!"
+            }
+        ];
+
+        /* --- State Variables --- */
+        let currentQuestionIndex = 0;
+        let honeyCount = 0;
+        let starCount = 0;
+        let isMuted = false;
+        let cleanedItemsCount = 0;
+        let synth = window.speechSynthesis;
+        let currentSpeechUtterance = null;
+
+        /* --- Audio Synthesizer (Web Audio API) for Gentle Sound FX --- */
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Gentle, soft, child-friendly musical sounds
+        function playTone(freq, type, duration, delay = 0) {
+            if (isMuted) return;
+            try {
+                initAudio();
+                setTimeout(() => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    
+                    osc.type = type; // 'sine' or 'triangle' for warm gentle tone
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                    
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + duration);
+                }, delay * 1000);
+            } catch(e){}
+        }
+
+        function playCorrectSFX() {
+            // Melodic chime (Marimba glass sound)
+            playTone(523.25, 'sine', 0.2, 0);    // C5
+            playTone(659.25, 'sine', 0.2, 0.1);  // E5
+            playTone(783.99, 'sine', 0.25, 0.2); // G5
+            playTone(1046.50, 'sine', 0.4, 0.3); // C6
+        }
+
+        function playWrongSFX() {
+            // Very soft, non-scary, gentle bounce chime
+            playTone(392.00, 'triangle', 0.15, 0);   // G4
+            playTone(329.63, 'triangle', 0.25, 0.12); // E4
+        }
+
+        function playCleanSFX() {
+            playTone(880, 'sine', 0.1, 0);
+            playTone(1318.5, 'sine', 0.15, 0.08);
+        }
+
+        function playClickSFX() {
+            playTone(400, 'sine', 0.05, 0);
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const icon = document.getElementById('soundIcon');
+            if (isMuted) {
+                icon.className = 'fa-solid fa-volume-xmark';
+                if (synth) synth.cancel();
+            } else {
+                icon.className = 'fa-solid fa-volume-high';
+                repeatSpeech();
+            }
+        }
+
+        /* --- Text To Speech (TTS) Setup with Gentle Pitch --- */
+        function speakText(text, onEndCallback = null) {
+            if (isMuted) {
+                if (onEndCallback) onEndCallback();
+                return;
+            }
+
+            if (!synth) {
+                if (onEndCallback) onEndCallback();
+                return;
+            }
+
+            synth.cancel(); // Stop current speech
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ar-SA';
+            
+            // Soft & cheerful pitched voice tuning
+            utterance.pitch = 1.35; // Cute, higher cartoon voice
+            utterance.rate = 0.92;  // Slightly relaxed speed for clear comprehension
+
+            // Try to set sweet female/Arabic voice if available
+            const voices = synth.getVoices();
+            const arVoice = voices.find(v => v.lang.includes('ar') || v.name.toLowerCase().includes('arabic') || v.name.toLowerCase().includes('laila') || v.name.toLowerCase().includes('salma') || v.name.toLowerCase().includes('zayd'));
+            if (arVoice) {
+                utterance.voice = arVoice;
+            }
+
+            utterance.onend = function() {
+                if (onEndCallback) onEndCallback();
+            };
+
+            currentSpeechUtterance = utterance;
+            synth.speak(utterance);
+        }
+
+        function repeatSpeech() {
+            playClickSFX();
+            const activeScreen = document.querySelector('.screen.active').id;
+            if (activeScreen === 'startScreen') {
+                speakText("مرحبًا يا أبطال النظافة! أنا نحولة، واليوم عندنا مغامرة ممتعة! سنحل الألغاز، ونجمع قطرات العسل، ونتعلم كيف نحافظ على نظافة ملابسنا وأماكننا. هل أنتم مستعدون؟");
+            } else if (activeScreen === 'quizScreen') {
+                const q = questions[currentQuestionIndex];
+                speakText(q.question);
+            } else if (activeScreen === 'surpriseScreen') {
+                speakText("اضغط على جميع النفايات لتنظيف المكان بسرعة!");
+            }
+        }
+
+        /* --- UI & Screen Navigation --- */
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function startGame() {
+            playClickSFX();
+            currentQuestionIndex = 0;
+            honeyCount = 0;
+            starCount = 0;
+            updateStats();
+            showScreen('quizScreen');
+            loadQuestion();
+        }
+
+        function updateStats() {
+            document.getElementById('honeyScore').textContent = honeyCount;
+            document.getElementById('starScore').textContent = starCount;
+        }
+
+        function loadQuestion() {
+            const q = questions[currentQuestionIndex];
+            
+            // Update stage title
+            document.getElementById('stageName').textContent = q.stageTitle;
+            const stageIconEl = document.querySelector('#stageBadge i');
+            stageIconEl.className = `fa-solid ${q.stageIcon}`;
+
+            // Update question & counter
+            document.getElementById('questionText').textContent = q.question;
+            document.getElementById('qCounterText').textContent = `السؤال ${currentQuestionIndex + 1} من ${questions.length}`;
+            
+            // Progress bar
+            const progPercent = ((currentQuestionIndex) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = `${progPercent}%`;
+
+            // Reset Bee state & Hints
+            const quizBee = document.getElementById('quizBee');
+            quizBee.className = "bee-wrapper bee-float";
+            document.getElementById('hintBox').style.display = 'none';
+
+            // Populate options
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            const prefixes = ['أ', 'ب', 'ج'];
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.onclick = () => checkAnswer(idx, btn);
+                btn.innerHTML = `
+                    <span>${opt}</span>
+                    <div class="opt-badge">${prefixes[idx]}</div>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+
+            // Speak Question
+            speakText(q.question);
+        }
+
+        function checkAnswer(selectedIndex, btnElement) {
+            const q = questions[currentQuestionIndex];
+            const allOptionBtns = document.querySelectorAll('.option-btn');
+
+            if (selectedIndex === q.correct) {
+                // Correct Answer
+                playCorrectSFX();
+                btnElement.classList.add('correct');
+                allOptionBtns.forEach(b => b.style.pointerEvents = 'none');
+
+                const quizBee = document.getElementById('quizBee');
+                quizBee.className = "bee-wrapper bee-happy";
+
+                honeyCount += 1;
+                starCount += 2;
+                updateStats();
+
+                speakText("أحسنت! إجابة صحيحة يا بطل!", () => {
+                    setTimeout(() => {
+                        currentQuestionIndex++;
+                        if (currentQuestionIndex === 4) {
+                            // Launch Surprise Stage after Question 4
+                            loadSurpriseStage();
+                        } else if (currentQuestionIndex < questions.length) {
+                            loadQuestion();
+                        } else {
+                            loadEndScreen();
+                        }
+                    }, 800);
+                });
+
+            } else {
+                // Incorrect Answer - Gentle feedback
+                playWrongSFX();
+                btnElement.classList.add('wrong');
+                btnElement.style.pointerEvents = 'none';
+
+                // Show hint
+                const hintBox = document.getElementById('hintBox');
+                document.getElementById('hintText').textContent = q.hint;
+                hintBox.style.display = 'flex';
+
+                speakText("محاولة جميلة! فكّر مرة أخرى، سأساعدك بتلميح");
+            }
+        }
+
+        /* --- Surprise Stage Logic --- */
+        function loadSurpriseStage() {
+            showScreen('surpriseScreen');
+            cleanedItemsCount = 0;
+            const dirtyItems = document.querySelectorAll('.dirty-item');
+            dirtyItems.forEach(item => {
+                item.classList.remove('cleaned');
+                item.style.pointerEvents = 'auto';
+            });
+            speakText("اضغط على جميع النفايات لتنظيف المكان بسرعة!");
+        }
+
+        function cleanItem(element) {
+            if (element.classList.contains('cleaned')) return;
+
+            playCleanSFX();
+            element.classList.add('cleaned');
+            cleanedItemsCount++;
+
+            honeyCount += 1;
+            updateStats();
+
+            if (cleanedItemsCount === 5) {
+                playCorrectSFX();
+                starCount += 3;
+                updateStats();
+                document.getElementById('surpriseBubble').innerHTML = "✨ يا لك من بطل خارق! أصبحت الغرفة نظيفة وجميلة جداً! ✨";
+                
+                speakText("يا لك من بطل خارق! أصبحت الغرفة نظيفة وجميلة جداً!", () => {
+                    setTimeout(() => {
+                        showScreen('quizScreen');
+                        loadQuestion();
+                    }, 1200);
+                });
+            }
+        }
+
+        /* --- End Screen & Celebration --- */
+        function loadEndScreen() {
+            showScreen('endScreen');
+            document.getElementById('progressBar').style.width = '100%';
+            document.getElementById('stageName').textContent = "مبارك! أتممت المغامرة";
+            
+            document.getElementById('finalHoney').textContent = honeyCount;
+            document.getElementById('finalStars').textContent = starCount;
+
+            // Trigger celebratory Confetti
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 120,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+            }
+
+            playCorrectSFX();
+            speakText("رائع يا أبطال! لقد أثبتم أنكم أصدقاء النظافة! تذكروا دائمًا: ملابسي نظيفة، ومكاني نظيف، وأنا مسؤول عن نظافتي!");
+        }
+
+        function resetGame() {
+            playClickSFX();
+            showScreen('startScreen');
+            speakText("مرحبًا يا أبطال النظافة! أنا نحولة، واليوم عندنا مغامرة ممتعة! سنحل الألغاز، ونجمع قطرات العسل، ونتعلم كيف نحافظ على نظافة ملابسنا وأماكننا. هل أنتم مستعدون؟");
+        }
+
+        // Initialize speech synthesis voices load
+        if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => {
+                synth.getVoices();
+            };
+        }
+    </script>
+</body>
+</html>
